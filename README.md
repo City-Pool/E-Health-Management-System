@@ -1,4 +1,4 @@
-# EHealth Management System — Review 2 (Transactions & MVC Enforcement)
+# EHealth Management System — Review 1 (Transactions & MVC Enforcement)
 
 ## Summary of changes
 This update enforces strict MVC separation and implements JDBC transaction management for critical operations (booking an appointment). Key improvements:
