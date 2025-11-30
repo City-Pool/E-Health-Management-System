@@ -1,25 +1,24 @@
 package com.ehealth.app;
 
-import com.ehealth.model.Patient;
-import com.ehealth.dao.PatientDAO;
+import com.ehealth.model.Appointment;
+import com.ehealth.service.AppointmentService;
 
-import java.sql.SQLException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class MainApp {
     public static void main(String[] args) {
-        PatientDAO dao = new PatientDAO();
-        Patient p = new Patient();
-        p.setFirstName("John");
-        p.setLastName("Doe");
-        p.setDob(LocalDate.of(1990,1,1));
-        p.setGender("Male");
+        AppointmentService service = new AppointmentService();
+        Appointment a = new Appointment();
+        a.setPatientId(1L); // adjust based on seeded data
+        a.setDoctorId(1L);
+        a.setScheduledDateTime(LocalDateTime.of(2025,12,1,10,0));
+        a.setStatus("SCHEDULED");
 
         try {
-            dao.save(p);
-            System.out.println("Saved patient with ID: " + p.getId());
-        } catch (SQLException e) {
-            System.err.println("Database error: " + e.getMessage());
+            long id = service.bookAppointment(a);
+            System.out.println("Appointment booked with id: " + id);
+        } catch (Exception e) {
+            System.err.println("Failed to book appointment: " + e.getMessage());
         }
     }
 }
