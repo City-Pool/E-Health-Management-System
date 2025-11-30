@@ -1,28 +1,20 @@
-# EHealth Management System - Review 1 Submission
+# EHealth Management System — Review 2 (Transactions & MVC Enforcement)
 
-## Overview
-This repository contains the initial project skeleton for Review 1. The focus is on core Java concepts, OOP design, JDBC connectivity, and database schema design.
+## Summary of changes
+This update enforces strict MVC separation and implements JDBC transaction management for critical operations (booking an appointment). Key improvements:
+- Business logic moved to `service` layer (`AppointmentService`) — UI/MainApp only calls services.
+- DAOs provide transaction-aware methods that accept a `java.sql.Connection` so multiple DAO calls can share one transaction.
+- `doctor_schedule` table added to manage available slots; `DoctorDAO.reserveSlot(conn, doctorId, slot)` updates availability within the transaction.
+- `AppointmentService.bookAppointment()` demonstrates the correct pattern: start transaction, validate, reserve slot, create appointment, commit; rollback on error.
+- README and example `MainApp` updated to show usage.
 
-## Structure
-- `src/main/java/com/ehealth` : Java source code (models, dao, db helper, app)
-- `src/main/resources` : configuration files
-- `database` : SQL scripts
-- `docs` : diagrams and documentation
-- `presentation` : Review 1 presentation file (PPTX)
+## How booking is atomic (important)
+The `bookAppointment` method obtains a single `Connection`, sets `autoCommit=false`, calls DAO methods (passing the connection), and finally commits or rolls back the transaction depending on success or failure. This guarantees that related changes (slot reservation + appointment row) either both happen or neither does.
 
-## Setup & Run (local)
-1. Create a MySQL database named `ehealth` and run the SQL script in `database/schema.sql` to create tables.
-2. Update the DB credentials in `com.ehealth.db.DatabaseConnection`.
-3. Compile and run `MainApp.java` using your IDE or `javac`/`java` commands.
-   Example (from project root):
-   ```
-   javac -d out src/main/java/com/ehealth/**/*.java
-   java -cp out com.ehealth.app.MainApp
-   ```
-
-## Database schema
-A simple `patient` table is used as an example. See `database/schema.sql`
-
-## Notes
-- This is a starter skeleton for Review 1. Add more DAOs, services, and unit tests in future iterations.
-- Code is intentionally simple and commented for learning purposes.
+## How to test locally
+1. Create the `ehealth` database and run `database/schema.sql` and optionally `database/seed.sql`.
+2. Set environment variables or edit `DatabaseConnection` defaults:
+   - EHEALTH_DB_URL, EHEALTH_DB_USER, EHEALTH_DB_PASS
+3. Build the project with Maven: `mvn clean package`
+4. Run the MainApp: `mvn exec:java -Dexec.mainClass="com.ehealth.app.MainApp"` (add exec plugin if needed)
+5. Verify that booking a slot twice results in an error and that no partial data is left in the database.

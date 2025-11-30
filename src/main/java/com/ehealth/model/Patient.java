@@ -26,8 +26,8 @@ public class Patient {
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
-    public LocalDate getDob() { return dob; }
-    public void setDob(LocalDate dob) { this.dob = dob; }
+    public java.time.LocalDate getDob() { return dob; }
+    public void setDob(java.time.LocalDate dob) { this.dob = dob; }
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
     public String getPhone() { return phone; }

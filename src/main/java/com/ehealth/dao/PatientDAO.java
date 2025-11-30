@@ -9,10 +9,10 @@ import java.util.List;
 
 public class PatientDAO {
 
-    public void save(Patient p) throws SQLException {
+    // Transaction-aware save: accepts connection
+    public long save(Connection conn, Patient p) throws SQLException {
         String sql = "INSERT INTO patient (first_name, last_name, dob, gender, phone, email) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, p.getFirstName());
             ps.setString(2, p.getLastName());
             ps.setDate(3, p.getDob() != null ? Date.valueOf(p.getDob()) : null);
@@ -21,8 +21,21 @@ public class PatientDAO {
             ps.setString(6, p.getEmail());
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) p.setId(rs.getLong(1));
+                if (rs.next()) {
+                    long id = rs.getLong(1);
+                    p.setId(id);
+                    return id;
+                }
             }
+        }
+        throw new SQLException("Failed to save patient");
+    }
+
+    // Convenience wrapper: opens its own connection
+    public long save(Patient p) throws SQLException {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(true);
+            return save(conn, p);
         }
     }
 
